@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import InvestmentRoutes from './investment'
 
 Vue.use(VueRouter)
 
@@ -10,6 +11,7 @@ const router = new VueRouter({
     return { x: 0, y: 0 }
   },
   routes: [
+    ...InvestmentRoutes,
     {
       path: '/',
       name: 'home',

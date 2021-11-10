@@ -12,10 +12,10 @@ class InvestmentController extends Controller
      * Update Investment
      * @return Illuminate\Facades\Support\Response
      */
-    public function index($status)
+    public function index()
     {
-        $status = $status || 1;
-        $investments = Investment::where('status', Investment::STATUS[$status])
+        $status = isset(request()->status) || 1;
+        $investments = Investment::where('status', Investment::$STATUS[$status])
                                 ->get();
         return response([
             'success' => true,

@@ -17,7 +17,7 @@ class CreateInvestmentTable extends Migration
             $table->id();
             $table->string('title');
             $table->text('description');
-            $table->text('image');
+            $table->string('image');
             $table->string('icon');
             $table->enum('status', ['active', 'inactive', 'removed']);
             $table->softDeletes();

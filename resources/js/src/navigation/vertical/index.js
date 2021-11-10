@@ -5,8 +5,14 @@ export default [
     icon: 'HomeIcon',
   },
   {
-    title: 'Second Page',
-    route: 'second-page',
-    icon: 'FileIcon',
+    title: 'Investment',
+    icon: 'EditIcon',
+    children: [
+      {
+        title: 'Investments',
+        route: 'list-investment',
+        icon: 'ListIcon',
+      }
+    ]
   },
 ]
