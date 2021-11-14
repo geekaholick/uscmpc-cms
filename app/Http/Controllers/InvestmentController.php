@@ -3,10 +3,19 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\Investment;
+use App\Http\Requests\InvestmentRequest;
+use App\Http\Controllers\ImageController;
 
 class InvestmentController extends Controller
 {
+    protected $imageController;
+
+    function __construct()
+    {
+        $this->imageController = new ImageController();
+    }
 
      /**
      * Update Investment
@@ -14,9 +23,10 @@ class InvestmentController extends Controller
      */
     public function index()
     {
-        $status = isset(request()->status) || 1;
-        $investments = Investment::where('status', Investment::$STATUS[$status])
-                                ->get();
+        $investments = (isset($request->status)) ? 
+                    $investments = Investment::where('status', Investment::$STATUS[request()->status])->get()
+                    : $investments = Investment::all();
+
         return response([
             'success' => true,
             'data'    => $investments,
@@ -28,17 +38,23 @@ class InvestmentController extends Controller
      * @param Illuminate\Http\Request $request
      * @return Illuminate\Facades\Support\Response
      */
-    public function store(Request $request)
+    public function store(InvestmentRequest $request)
     {
+        DB::beginTransaction();
         try {
-            $investment          = Investment::create($request->all());
+            $data                = $request->all();
+            $data['image']       = $this->imageController->saveImageAndGetImageName($request);
+
+            $investment          = Investment::create($data);
             $response['success'] = true;
             $response['message'] = 'Successfully created!';
             $response['data']    = $investment; 
+            DB::commit();
         } catch ( \Exception $e) {
             $response['success'] = false;
             $response['message'] = $e->getMessage();
-            $response['data']    = null; 
+            $response['data']    = null;
+            DB::rollback();
         }
 
         return response($response);
@@ -49,17 +65,27 @@ class InvestmentController extends Controller
      * @param Illuminate\Http\Request $request
      * @return Illuminate\Facades\Support\Response
      */
-    public function update(Request $request)
+    public function update(InvestmentRequest $request)
     {
+        DB::beginTransaction();
         try {
-            $investment          = Investment::update($request->all());
+            $imageName = $this->saveImageAndGetImageName($request);
+            $data = $request->all();
+            if ($imageName) {
+                $data['image'] = $imageName;
+            }
+
+            $investment = Investment::findOrFail($request->id);
+            $investment->update($data);
             $response['success'] = true;
             $response['message'] = 'Successfully updated!';
-            $response['data']    = $investment; 
+            $response['data']    = $investment;
+            DB::commit();
         } catch ( \Exception $e) {
             $response['success'] = false;
             $response['message'] = $e->getMessage();
-            $response['data']    = null; 
+            $response['data']    = null;
+            DB::rollback();
         }
 
         return response($response);
@@ -72,15 +98,18 @@ class InvestmentController extends Controller
      */
     public function destroy(Request $request)
     {
+        DB::beginTransaction();
         try {
             $investment          = Investment::findOrFail($request->id);
             $response['success'] = true;
             $response['message'] = 'Successfully deleted!';
-            $response['data']    = $investment; 
+            $response['data']    = $investment;
+            DB::commit();
         } catch ( \Exception $e) {
             $response['success'] = false;
             $response['message'] = $e->getMessage();
-            $response['data']    = null; 
+            $response['data']    = null;
+            DB::rollback();
         }
 
         return response($response);

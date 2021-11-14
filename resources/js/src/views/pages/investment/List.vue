@@ -4,12 +4,12 @@
 
     <b-card title="Filters">
       <b-row>
-        <b-col
+        <!-- <b-col
           cols="12"
           md="4"
           class="d-flex align-items-center mb-1"
         >
-          <!-- Type of Event -->
+          Type of Event // comment this line if the code is in used
           <b-form-group class="w-100">
             <label>Type of Event</label>
             <v-select
@@ -18,7 +18,7 @@
               :options="option"
             />
           </b-form-group>
-        </b-col>
+        </b-col> -->
         <b-col
           cols="12"
           md="4"
@@ -26,20 +26,20 @@
         >
           <!-- Event Status -->
           <b-form-group class="w-100">
-            <label>Event Status</label>
+            <label>Investment Status</label>
             <v-select
-              v-model="eventStatus"
+              v-model="investmentStatus"
               label="status"
-              :options="option1"
+              :options="investmentStatuses"
             />
           </b-form-group>
         </b-col>
-        <b-col
+        <!-- <b-col
           cols="12"
           md="4"
           class="d-flex align-items-center mb-1"
         >
-          <!-- Reoccuring Event -->
+          Reoccuring Event // comment this line if this code is in used
           <b-form-group class="w-100">
             <label>Reoccurring Event</label>
             <v-select
@@ -48,7 +48,7 @@
               :options="option2"
             />
           </b-form-group>
-        </b-col>
+        </b-col> -->
       </b-row>
     </b-card>
 
@@ -74,7 +74,7 @@
               :options="perPageOptions"
               :clearable="false"
               class="per-page-selector d-inline-block mx-50"
-              @change="handlePageSizeChange($event)"
+              @change="handlePageSizeChange([])"
             />
             <label>Entries</label>
           </b-col>
@@ -107,9 +107,9 @@
             <b-button
               variant="primary"
               type="button"
-              to="/event/create"
+              to="/investment/new"
               @click="isAddNewUserSidebarActive = true"
-            >Add New Event</b-button>
+            >Add New Invstment</b-button>
           </b-col>
         </b-row>
       </div>
@@ -118,9 +118,9 @@
         ref="refEventListTable"
         class="position-relative"
         :filter="searchQuery"
-        :filter-included-fields="eventTableFields"
-        :items="events"
-        :fields="eventTableFields"
+        :filter-included-fields="investmentTableFields"
+        :items="investments"
+        :fields="investmentTableFields"
         :current-page="currentPage"
         responsive
         primary-key="id"
@@ -152,10 +152,8 @@
         <template #cell(role)="data">
           <div class="text-nowrap">
             <feather-icon
-              :icon="resolveUserRoleIcon(data.item.role)"
               size="18"
               class="mr-50"
-              :class="`text-${resolveUserRoleVariant(data.item.role)}`"
             />
             <span class="align-text-top text-capitalize">
               {{ data.item.role }}
@@ -167,10 +165,8 @@
         <template #cell(organiser)="data">
           <div class="text-nowrap">
             <feather-icon
-              :icon="resolveUserRoleIcon(data.item.role)"
               size="18"
               class="mr-50"
-              :class="`text-${resolveUserRoleVariant(data.item.role)}`"
             />
             <span class="align-text-top text-capitalize">
               {{ data.item.role }}
@@ -182,7 +178,6 @@
         <template #cell(status)="data">
           <b-badge
             pill
-            :variant="`light-${resolveUserStatusVariant(data.item.status)}`"
             class="text-capitalize"
           >{{ data.item.status }}</b-badge>
         </template>
@@ -201,22 +196,17 @@
                 class="align-middle text-body"
               />
             </template>
-            <b-dropdown-item
-              :to="{
-                name: 'view-member-registration',
-                params: { id: data.item.id },
-              }"
-            >
+            <b-dropdown-item @click="setInvestment(data.item, 'view-investment')">
               <feather-icon icon="FileTextIcon" />
               <span class="align-middle ml-50">Details</span>
             </b-dropdown-item>
 
-            <b-dropdown-item @click="setEvent(data.item)">
+            <b-dropdown-item @click="setInvestment(data.item, 'edit-investment')">
               <feather-icon icon="EditIcon" />
               <span class="align-middle ml-50">Edit</span>
             </b-dropdown-item>
 
-            <b-dropdown-item>
+            <b-dropdown-item @click="setInvestment(data.item, 'list-investment')">
               <feather-icon icon="TrashIcon" />
               <span class="align-middle ml-50">Delete</span>
             </b-dropdown-item>
@@ -244,7 +234,7 @@
           >
             <b-pagination
               v-model="currentPage"
-              :total-rows="rows"
+              :total-rows="1"
               :per-page="perPage"
               class="mb-0 mt-1 mt-sm-0"
               prev-class="prev-item"
@@ -286,6 +276,7 @@ import {
 } from 'bootstrap-vue'
 import { mapGetters, mapActions, mapMutations } from 'vuex'
 import vSelect from 'vue-select'
+import * as InvestmentTypes from '../../../store/types/investment'
 
 export default {
   components: {
@@ -308,40 +299,43 @@ export default {
     perPage: 10,
     currentPage: 1,
     eventType: null,
-    eventStatus: null,
+    investmentStatus: null,
     reocurringEvent: null,
-    eventTableFields: [
-      'content',
-      'start_datetime',
-      'end_datetime',
-      'is_reccuring',
-      'venue',
-      'organizer',
-      'type',
+    investmentTableFields: [
+      'title',
+      'icon',
+      'status',
       'actions',
     ],
     dir: 'ltr',
-    option: [
-      { type: 'Seminars' },
-      { type: 'Conferences' },
-      { type: 'Trade Shows' },
-      { type: 'Workshops' },
-    ],
-    option1: [
-      { status: 'Ongoing' },
-      { status: 'Done' },
-      { status: 'Upcoming Event' },
+    // option: [
+    //   { type: 'Seminars' },
+    //   { type: 'Conferences' },
+    //   { type: 'Trade Shows' },
+    //   { type: 'Workshops' },
+    // ],
+    investmentStatuses: [
+      { status: 'Active' },
+      { status: 'Inactive' },
+      { status: 'Removed' },
     ],
     option2: [{ option: 'Yes' }, { option: 'No' }],
   }),
   computed: {
-    // code ...
+    ...mapGetters({
+      investments : InvestmentTypes.GETTER_INVESTMENTS
+    }),
   },
-  mounted() {
-    // code ...
+  async mounted() {
+    await this[InvestmentTypes.ACTION_INVESTMENTS]()
   },
   methods: {
-    // code ...
+    ...mapActions([InvestmentTypes.ACTION_INVESTMENTS]),
+    ...mapMutations([InvestmentTypes.MUTATION_INVESTMENT]),
+    setInvestment(investment, to) {
+      this[InvestmentTypes.MUTATION_INVESTMENT](investment)
+      this.$router.push({name: to})
+    }
   },
 }
 </script>
@@ -349,3 +343,4 @@ export default {
 <style lang="scss">
 @import '@core/scss/vue/libs/vue-select.scss';
 </style>
+// :icon="resolveUserRoleIcon(data.item.role)"

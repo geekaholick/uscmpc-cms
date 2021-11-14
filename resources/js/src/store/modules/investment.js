@@ -15,23 +15,35 @@ export default {
         [InvestmentTypes.MUTATION_INVESTMENT]: (state, investment) => state.investment = investment, 
     },
     actions: {
-        [InvesstmentTypes.ACTION_INVESTMENTS]: async ({commit}) => {
+        [InvestmentTypes.ACTION_INVESTMENTS]: async ({commit}) => {
             const response = await axios.get('investments/')
             if (response.data.success) {
-                commit(InvesstmentTypes.MUTATION_INVESTMENTS, response.data.data)
+                commit(InvestmentTypes.MUTATION_INVESTMENTS, response.data.data)
             }
+            return response
         },
-        [InvestmentTypes.ACTION_CREATE_INVESTMENT]: async ({dispatch}, investment) => {
-            const response = await axios.post('investments/', investment)
+        [InvestmentTypes.ACTION_CREATE_INVESTMENT]: async ({dispatch, getters}) => {
+            const investment = getters[InvestmentTypes.GETTER_INVESTMENT]
+
+            const data = new FormData()
+            // Test, Partial changes
+            data.append('description',investment.description)
+            data.append('title',investment.title)
+            data.append('image', investment.image)
+            data.append('icon', investment.icon || 'fa fa-search')
+
+            const response = await axios.post('investments/', data)
             if (response.data.success) {
-                dispatch(InvesstmentTypes.ACTION_INVESTMENTS)
+                dispatch(InvestmentTypes.ACTION_INVESTMENTS)
             }
+            return response
         },
         [InvestmentTypes.ACTION_EDIT_INVESTMENT]: async ({dispatch}, investment) => {
             const response = await axios.post('investments/', investment)
             if (response.data.success) {
-                dispatch(InvesstmentTypes.ACTION_INVESTMENTS)
+                dispatch(InvestmentTypes.ACTION_INVESTMENTS)
             }
+            return response
         }
     },
 }

@@ -10,7 +10,7 @@ class Investment extends Model
 {
     use HasFactory, SoftDeletes;
 
-    static $STATUS = [
+    public static $STATUS = [
         0 => 'inactive',
         1 => 'active',
         2 => 'removed',
