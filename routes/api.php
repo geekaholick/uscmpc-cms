@@ -22,5 +22,5 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::get('investments/{status?}', [InvestmentController::class, 'index']);
 Route::post('investments/', [InvestmentController::class, 'store']);
-Route::put('investments/{id}', [InvestmentController::class, 'update']);
+Route::post('investments/{id}', [InvestmentController::class, 'update']);
 Route::delete('investments/{id}', [InvestmentController::class, 'destroy']);

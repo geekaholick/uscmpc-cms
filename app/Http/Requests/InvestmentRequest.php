@@ -31,7 +31,6 @@ class InvestmentRequest extends FormRequest
         return [
             'content'        => 'required',
             'venue'          => 'required',
-            'is_reccuring'   => 'required',
         ];
     }
 

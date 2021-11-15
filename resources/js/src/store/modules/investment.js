@@ -38,11 +38,20 @@ export default {
             }
             return response
         },
-        [InvestmentTypes.ACTION_EDIT_INVESTMENT]: async ({dispatch}, investment) => {
-            const response = await axios.post('investments/', investment)
+        [InvestmentTypes.ACTION_EDIT_INVESTMENT]: async ({dispatch, getters}) => {
+            const investment = getters[InvestmentTypes.GETTER_INVESTMENT]
+            const data = new FormData()
+            // Test, Partial changes
+            data.append('description',investment.description)
+            data.append('title',investment.title)
+            data.append('image', investment.image)
+            data.append('icon', investment.icon || 'fa fa-search')
+            
+            const response = await axios.post(`/investments/${investment.id}`, data)
             if (response.data.success) {
                 dispatch(InvestmentTypes.ACTION_INVESTMENTS)
             }
+            console.log(response)
             return response
         }
     },

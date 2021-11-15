@@ -74,7 +74,6 @@
               :options="perPageOptions"
               :clearable="false"
               class="per-page-selector d-inline-block mx-50"
-              @change="handlePageSizeChange([])"
             />
             <label>Entries</label>
           </b-col>
@@ -87,11 +86,6 @@
               placeholder="Search"
               class="w-100"
             />
-            <!-- <b-input-group-append>
-              <b-button variant="outline-primary">
-                <feather-icon icon="SearchIcon" />
-              </b-button>
-            </b-input-group-append> -->
           </b-col>
           <!-- Add New Event -->
           <b-col
@@ -99,11 +93,6 @@
             md="3"
             class="text-right"
           >
-            <!-- <b-form-input
-              v-model="searchQuery"
-              class="d-inline-block mr-1"
-              placeholder="Search..."
-            />-->
             <b-button
               variant="primary"
               type="button"
@@ -131,15 +120,6 @@
         <!-- Column: Event Name -->
         <template #cell(event)="data">
           <b-media vertical-align="center">
-            <!-- <template #aside>
-            <b-avatar
-              size="32"
-              :src="data.item.avatar"
-              :text="avatarText(data.item.fullName)"
-              :variant="`light-${resolveUserRoleVariant(data.item.role)}`"
-              :to="{ name: 'apps-users-view', params: { id: data.item.id } }"
-            />
-          </template>-->
             <b-link
               :to="{ name: 'apps-users-view', params: { id: data.item.id } }"
               class="font-weight-bold d-block text-nowrap"
@@ -179,6 +159,7 @@
           <b-badge
             pill
             class="text-capitalize"
+            :variant="(variantColor(data.item)).variant"
           >{{ data.item.status }}</b-badge>
         </template>
 
@@ -221,10 +202,6 @@
             sm="6"
             class="d-flex align-items-center justify-content-center justify-content-sm-start"
           >
-            <!-- <span
-            class="text-muted"
-          >Showing {{ paginateMeta.from }} to {{ paginateMeta.to }} of
-          {{ paginateMeta.total }} entries</span>-->
           </b-col>
           <!-- Pagination -->
           <b-col
@@ -234,7 +211,7 @@
           >
             <b-pagination
               v-model="currentPage"
-              :total-rows="1"
+              :total-rows="rows"
               :per-page="perPage"
               class="mb-0 mt-1 mt-sm-0"
               prev-class="prev-item"
@@ -308,16 +285,10 @@ export default {
       'actions',
     ],
     dir: 'ltr',
-    // option: [
-    //   { type: 'Seminars' },
-    //   { type: 'Conferences' },
-    //   { type: 'Trade Shows' },
-    //   { type: 'Workshops' },
-    // ],
     investmentStatuses: [
-      { status: 'Active' },
-      { status: 'Inactive' },
-      { status: 'Removed' },
+      { status: 'Active', variant: 'success', id: 1},
+      { status: 'Inactive', variant: 'secondary', id: 0},
+      { status: 'Removed', variant: 'warning', id: 2},
     ],
     option2: [{ option: 'Yes' }, { option: 'No' }],
   }),
@@ -325,6 +296,9 @@ export default {
     ...mapGetters({
       investments : InvestmentTypes.GETTER_INVESTMENTS
     }),
+    rows() {
+      return this.investments.length
+    }
   },
   async mounted() {
     await this[InvestmentTypes.ACTION_INVESTMENTS]()
@@ -335,6 +309,11 @@ export default {
     setInvestment(investment, to) {
       this[InvestmentTypes.MUTATION_INVESTMENT](investment)
       this.$router.push({name: to})
+    },
+    variantColor(data) {
+      return this.investmentStatuses.find(investmentStatus => {
+        return investmentStatus.status.toLowerCase() === data.status.toLowerCase()
+      })
     }
   },
 }
@@ -343,4 +322,3 @@ export default {
 <style lang="scss">
 @import '@core/scss/vue/libs/vue-select.scss';
 </style>
-// :icon="resolveUserRoleIcon(data.item.role)"

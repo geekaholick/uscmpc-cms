@@ -143,6 +143,7 @@ export default {
     ...mapActions([InvestmentTypes.ACTION_CREATE_INVESTMENT, ]),
     onSubmit() {
       // get image
+      this.spinner = true
       this.investment.image = this.$refs.img.$refs.input.files[0]
       this.$refs.validateForm.validate().then(async success => {
         if (success) {
@@ -158,6 +159,7 @@ export default {
                 variant: 'success',
               },
             })
+            this.$router.push({name: 'list-investment'})
           } else {
             this.$toast({
               component: ToastificationContent,
@@ -179,6 +181,7 @@ export default {
             })
         }
       })
+      this.spinner = false
     }
   },
 }

@@ -1,7 +1,7 @@
 <template>
   <div>
     <b-card title="Fill the needed Information">
-      <validation-observer ref="">
+      <validation-observer ref="validateForm">
         <b-form @submit.prevent>
           <validation-provider
             #default="{ errors }"
@@ -11,7 +11,7 @@
             <b-form-group label="Title">
               <b-form-input
                 id="investment-title"
-                v-model="investment.type"
+                v-model="investment_edit.title"
                 :state="errors.length > 0 ? false : null"
                 name="event-venue"
                 placeholder="Event Type"
@@ -21,25 +21,7 @@
           <b-form-group label="Investment Image">
             <b-form-file
               ref="img"
-              multiple
-              @change="showImages"
             />
-            <div
-              v-show="img.length"
-              id="dropdown-cont"
-            >
-              <b-dropdown
-                ref="imageListDropdown"
-                text="Image/s to upload"
-              >
-                <b-dropdown-item
-                  v-for="item in img"
-                  :key="item.lastModified"
-                >
-                  {{ item.name }}
-                </b-dropdown-item>
-              </b-dropdown>
-            </div>
           </b-form-group>
           <validation-provider
             #default="{ errors }"
@@ -49,7 +31,7 @@
             <b-form-group label="Investment Description">
               <b-form-textarea
                 id="investment-description"
-                v-model="investment.content"
+                v-model="investment_edit.description"
                 :state="errors.length > 0 ? false : null"
                 class="form-control-merge"
                 name="investment-description"
@@ -64,6 +46,7 @@
             <div class="col text-center">
               <b-button
                 variant="primary"
+                @click="onSubmit"
                 type="submit"
               >
                 Submit
@@ -97,8 +80,9 @@ import {
 } from 'bootstrap-vue'
 import { ValidationProvider, ValidationObserver } from 'vee-validate'
 import { required, email } from '@validations'
-import { mapState, mapActions, mapMutations } from 'vuex'
+import { mapState, mapActions, mapMutations, mapGetters } from 'vuex'
 import ToastificationContent from '@core/components/toastification/ToastificationContent.vue'
+import * as InvestmentTypes from '../../../store/types/investment.js'
 
 export default {
   name: 'CreateEvent',
@@ -106,7 +90,7 @@ export default {
     BDropdown,
     BDropdownItem,
     BSpinner,
-    BCard,
+    BCard,  
     BRow,
     BButton,
     BCol,
@@ -125,21 +109,69 @@ export default {
     return {
       required,
       email,
+      investment_edit: {},
       start_time: '00:00:00',
       end_time: '00:00:00',
       start_date: '',
       end_date: '',
       spinner: false,
       img: [],
-      investment: {},
       showImages: false,
     }
   },
   computed: {
-    // code ...
+    ...mapGetters({
+      'investment': InvestmentTypes.GETTER_INVESTMENT
+    })
+  },
+  mounted() {
+    this.investment_edit = this.investment
   },
   methods: {
-    // code ...
+    ...mapMutations([InvestmentTypes.MUTATION_INVESTMENT,]),
+    ...mapActions([InvestmentTypes.ACTION_EDIT_INVESTMENT, ]),
+    onSubmit() {
+      // get image
+      this.spinner = true
+      this.investment_edit.image = this.$refs.img.$refs.input.files[0]
+      this.$refs.validateForm.validate().then(async success => {
+        if (success) {
+          this[InvestmentTypes.MUTATION_INVESTMENT](this.investment_edit)
+          const response = await this[InvestmentTypes.ACTION_EDIT_INVESTMENT]()
+          if (response.data.success) {
+            // show when the response is success
+            this.$toast({
+              component: ToastificationContent,
+              props: {
+                title: 'Form Submitted',
+                icon: 'EditIcon',
+                variant: 'success',
+              },
+            })
+            this.$router.push({name: 'list-investment'})
+          } else {
+            this.$toast({
+              component: ToastificationContent,
+              props: {
+                title: 'Something went wrong',
+                icon: 'EditIcon',
+                variant: 'danger',
+              },
+            })
+          }
+        } else {
+          this.$toast({
+              component: ToastificationContent,
+              props: {
+                title: 'Please supply all information needed',
+                icon: 'EditIcon',
+                variant: 'warning',
+              },
+            })
+        }
+      })
+      this.spinner = false
+    }
   },
 }
 </script>

@@ -24,7 +24,8 @@ class ImageController
      * @return string $name
      */
     public function saveImageAndGetImageName(Request $request) {
-        if ($request->image) {
+        $name = null;
+        if ($request->image && gettype($request->image) != 'string') {
             $extension = $request->image->clientExtension();
             $name = time() . '.' . $extension;
             $destination = public_path('investment_images/'. $request->id);

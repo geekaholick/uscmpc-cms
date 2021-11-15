@@ -24,8 +24,9 @@ class InvestmentController extends Controller
     public function index()
     {
         $investments = (isset($request->status)) ? 
-                    $investments = Investment::where('status', Investment::$STATUS[request()->status])->get()
-                    : $investments = Investment::all();
+                    $investments = Investment::orderBy('created_at', 'desc')
+                                    ->where('status', Investment::$STATUS[request()->status])->get()
+                    : $investments = Investment::orderBy('created_at', 'desc')->get();
 
         return response([
             'success' => true,
@@ -65,17 +66,17 @@ class InvestmentController extends Controller
      * @param Illuminate\Http\Request $request
      * @return Illuminate\Facades\Support\Response
      */
-    public function update(InvestmentRequest $request)
+    public function update(InvestmentRequest $request, $id)
     {
         DB::beginTransaction();
         try {
-            $imageName = $this->saveImageAndGetImageName($request);
+            $imageName = $this->imageController->saveImageAndGetImageName($request);
             $data = $request->all();
             if ($imageName) {
                 $data['image'] = $imageName;
             }
 
-            $investment = Investment::findOrFail($request->id);
+            $investment = Investment::findOrFail($id);
             $investment->update($data);
             $response['success'] = true;
             $response['message'] = 'Successfully updated!';
