@@ -28,7 +28,7 @@
           <b-form-group class="w-100">
             <label>Investment Status</label>
             <v-select
-              v-model="investmentStatus"
+              v-model="searchParams.status"
               label="status"
               :options="investmentStatuses"
             />
@@ -85,6 +85,7 @@
             <b-form-input
               placeholder="Search"
               class="w-100"
+              v-model="searchParams.title"
             />
           </b-col>
           <!-- Add New Event -->
@@ -108,7 +109,7 @@
         class="position-relative"
         :filter="searchQuery"
         :filter-included-fields="investmentTableFields"
-        :items="investments"
+        :items="investmentsCopy"
         :fields="investmentTableFields"
         :current-page="currentPage"
         responsive
@@ -272,12 +273,11 @@ export default {
   },
   data: () => ({
     searchQuery: null,
+    searchParams: {},
     perPageOptions: [10, 20, 30, 40, 50],
     perPage: 10,
     currentPage: 1,
-    eventType: null,
-    investmentStatus: null,
-    reocurringEvent: null,
+    investmentsCopy:[],
     investmentTableFields: [
       'title',
       'icon',
@@ -292,20 +292,35 @@ export default {
     ],
     option2: [{ option: 'Yes' }, { option: 'No' }],
   }),
+  watch: {
+    searchParams: {
+      handler(newVal) {
+        this[InvestmentTypes.MUTATION_INVESTMENT_SEARCH](newVal)
+        this.filterInvestment()
+      },
+      deep: true,
+    }
+  },
   computed: {
     ...mapGetters({
-      investments : InvestmentTypes.GETTER_INVESTMENTS
+      investments : InvestmentTypes.GETTER_INVESTMENTS,
+      searchItems : InvestmentTypes.GETTER_INVESTMENT_SEARCH,
     }),
     rows() {
-      return this.investments.length
+      return this.investmentsCopy.length
     }
   },
   async mounted() {
     await this[InvestmentTypes.ACTION_INVESTMENTS]()
+    this[InvestmentTypes.MUTATION_INVESTMENT_SEARCH]({})
+    this.investmentsCopy = this.investments
   },
   methods: {
     ...mapActions([InvestmentTypes.ACTION_INVESTMENTS]),
-    ...mapMutations([InvestmentTypes.MUTATION_INVESTMENT]),
+    ...mapMutations([
+        InvestmentTypes.MUTATION_INVESTMENT, 
+        InvestmentTypes.MUTATION_INVESTMENT_SEARCH,
+    ]),
     setInvestment(investment, to) {
       this[InvestmentTypes.MUTATION_INVESTMENT](investment)
       this.$router.push({name: to})
@@ -313,6 +328,27 @@ export default {
     variantColor(data) {
       return this.investmentStatuses.find(investmentStatus => {
         return investmentStatus.status.toLowerCase() === data.status.toLowerCase()
+      })
+    },
+    filterInvestment() {
+      const keys = Object.keys(this.searchItems)
+      keys.forEach(key => {
+        this.investmentsCopy = this.investments.filter(investment => {
+          if (this.searchItems[key] !== null) {
+            if (key === 'title') {
+              console.log(key)
+              return (
+                investment.title.toLowerCase().includes(this.searchItems[key].toLowerCase())
+              )
+            }
+            if (key == 'status') {
+              console.log(key)
+              return (investment.status.toLowerCase() === (this.searchItems[key].status.toLowerCase()))
+            }
+            return investment[key] === this.searchItems[key]
+          }
+          return true
+        })
       })
     }
   },

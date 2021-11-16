@@ -1,10 +1,12 @@
 // getters
 export const GETTER_INVESTMENTS = 'investment/getAllInvestment'
 export const GETTER_INVESTMENT = 'investment/getInvestment'
+export const GETTER_INVESTMENT_SEARCH = 'investment/getInvestmentSearchParams'
 
 // mutations
 export const MUTATION_INVESTMENTS = 'investment/setInvestments'
 export const MUTATION_INVESTMENT = 'investment/setInvestment'
+export const MUTATION_INVESTMENT_SEARCH = 'investment/setInvestmentSearchParams'
 
 // ACTIONS
 export const ACTION_INVESTMENTS = 'investment/actGetAllInvestment'

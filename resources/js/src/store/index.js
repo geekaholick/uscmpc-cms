@@ -1,5 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import CreatePersistedState from 'vuex-persistedstate'
+
 
 // Modules
 import app from './app'
@@ -16,5 +18,6 @@ export default new Vuex.Store({
     verticalMenu,
     investment,
   },
+  plugins: [CreatePersistedState()],
   strict: process.env.DEV,
 })

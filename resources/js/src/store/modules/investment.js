@@ -4,15 +4,18 @@ import axios from '@/libs/axios'
 export default {
     state: {
         investments: [],
-        investment: {}
+        investment: {},
+        investmentSearchParams: {},
     },
     getters: {
         [InvestmentTypes.GETTER_INVESTMENTS]: state => state.investments,
         [InvestmentTypes.GETTER_INVESTMENT]: state => state.investment,
+        [InvestmentTypes.GETTER_INVESTMENT_SEARCH]: state => state.investmentSearchParams,
     },
     mutations: {
         [InvestmentTypes.MUTATION_INVESTMENTS]: (state, investments) => state.investments = investments,
-        [InvestmentTypes.MUTATION_INVESTMENT]: (state, investment) => state.investment = investment, 
+        [InvestmentTypes.MUTATION_INVESTMENT]: (state, investment) => state.investment = investment,
+        [InvestmentTypes.MUTATION_INVESTMENT_SEARCH]: (state, searchParams) => state.investmentSearchParams = searchParams
     },
     actions: {
         [InvestmentTypes.ACTION_INVESTMENTS]: async ({commit}) => {
