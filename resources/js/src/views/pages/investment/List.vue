@@ -295,6 +295,7 @@ export default {
   watch: {
     searchParams: {
       handler(newVal) {
+        if (!newVal.status) newVal.status = {status: ''}
         this[InvestmentTypes.MUTATION_INVESTMENT_SEARCH](newVal)
         this.filterInvestment()
       },
@@ -332,22 +333,14 @@ export default {
     },
     filterInvestment() {
       const keys = Object.keys(this.searchItems)
+      console.log(this.searchItems)
+      let retVal = {title: false, status: false}
       keys.forEach(key => {
         this.investmentsCopy = this.investments.filter(investment => {
-          if (this.searchItems[key] !== null) {
-            if (key === 'title') {
-              console.log(key)
-              return (
-                investment.title.toLowerCase().includes(this.searchItems[key].toLowerCase())
-              )
-            }
-            if (key == 'status') {
-              console.log(key)
-              return (investment.status.toLowerCase() === (this.searchItems[key].status.toLowerCase()))
-            }
-            return investment[key] === this.searchItems[key]
-          }
-          return true
+          return investment.title.toLowerCase().includes(this.searchItems.title ? 
+                  this.searchItems.title.toLowerCase(): '') &&
+                 investment.status.toLowerCase() === (this.searchItems.status ? 
+                  this.searchItems.status.status.toLowerCase() : investment.status.toLowerCase())
         })
       })
     }
