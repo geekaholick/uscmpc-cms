@@ -118,15 +118,16 @@
         empty-text="No matching records found"
         :per-page="perPage"
       >
-        <!-- Column: Event Name -->
-        <template #cell(event)="data">
-          <b-media vertical-align="center">
+        <!-- Column: Investment Icon -->
+        <template #cell(icon)="data">
+          <span><i :class="data.item.icon"></i></span>
+          <!-- <b-media vertical-align="center">
             <b-link
               :to="{ name: 'apps-users-view', params: { id: data.item.id } }"
               class="font-weight-bold d-block text-nowrap"
             >{{ data.item.fullName }}</b-link>
             <small class="text-muted">@{{ data.item.username }}</small>
-          </b-media>
+          </b-media> -->
         </template>
 
         <!-- Column: Event Description -->
@@ -168,8 +169,8 @@
         <template #cell(actions)="data">
           <b-dropdown
             variant="link"
-            no-caret
             :right="$store.state.appConfig.isRTL"
+            no-caret
           >
             <template #button-content>
               <feather-icon
@@ -178,17 +179,17 @@
                 class="align-middle text-body"
               />
             </template>
-            <b-dropdown-item @click="setInvestment(data.item, 'view-investment')">
+            <!-- <b-dropdown-item @click="setInvestment(data.item, 'view-investment')">
               <feather-icon icon="FileTextIcon" />
               <span class="align-middle ml-50">Details</span>
-            </b-dropdown-item>
+            </b-dropdown-item> -->
 
             <b-dropdown-item @click="setInvestment(data.item, 'edit-investment')">
               <feather-icon icon="EditIcon" />
               <span class="align-middle ml-50">Edit</span>
             </b-dropdown-item>
 
-            <b-dropdown-item @click="setInvestment(data.item, 'list-investment')">
+            <b-dropdown-item @click="setInvestment(data.item, 'list-investment', true)">
               <feather-icon icon="TrashIcon" />
               <span class="align-middle ml-50">Delete</span>
             </b-dropdown-item>
@@ -198,18 +199,8 @@
 
       <div class="mx-2 mb-2">
         <b-row>
-          <b-col
-            cols="12"
-            sm="6"
-            class="d-flex align-items-center justify-content-center justify-content-sm-start"
-          >
-          </b-col>
           <!-- Pagination -->
-          <b-col
-            cols="12"
-            sm="6"
-            class="d-flex align-items-center justify-content-center justify-content-sm-end"
-          >
+          <center>
             <b-pagination
               v-model="currentPage"
               :total-rows="rows"
@@ -231,7 +222,7 @@
                 />
               </template>
             </b-pagination>
-          </b-col>
+          </center>
         </b-row>
       </div>
     </b-card>
@@ -251,9 +242,11 @@ import {
   BCol,
   BCard,
   BRow,
+  BIcon,
 } from 'bootstrap-vue'
 import { mapGetters, mapActions, mapMutations } from 'vuex'
 import vSelect from 'vue-select'
+import ToastificationContent from '@core/components/toastification/ToastificationContent.vue'
 import * as InvestmentTypes from '../../../store/types/investment'
 
 export default {
@@ -270,6 +263,7 @@ export default {
     BCard,
     BRow,
     vSelect,
+    BIcon,
   },
   data: () => ({
     searchQuery: null,
@@ -279,10 +273,10 @@ export default {
     currentPage: 1,
     investmentsCopy:[],
     investmentTableFields: [
-      'title',
-      'icon',
-      'status',
-      'actions',
+      {key: 'title', sortable: true},
+      {key: 'icon', sortable: true},
+      {key: 'status', sortable: true},
+      {key: 'actions', sortable: true},
     ],
     dir: 'ltr',
     investmentStatuses: [
@@ -295,7 +289,7 @@ export default {
   watch: {
     searchParams: {
       handler(newVal) {
-        if (!newVal.status) newVal.status = {status: ''}
+        if (!newVal.status) newVal.status = null
         this[InvestmentTypes.MUTATION_INVESTMENT_SEARCH](newVal)
         this.filterInvestment()
       },
@@ -317,13 +311,16 @@ export default {
     this.investmentsCopy = this.investments
   },
   methods: {
-    ...mapActions([InvestmentTypes.ACTION_INVESTMENTS]),
+    ...mapActions([InvestmentTypes.ACTION_INVESTMENTS, InvestmentTypes.ACTION_DELETE_INVESTMENT]),
     ...mapMutations([
         InvestmentTypes.MUTATION_INVESTMENT, 
         InvestmentTypes.MUTATION_INVESTMENT_SEARCH,
     ]),
-    setInvestment(investment, to) {
+    async setInvestment(investment, to, isDelete = false) {
       this[InvestmentTypes.MUTATION_INVESTMENT](investment)
+      if (isDelete) {
+        await this.deleteInvestment()
+      }
       this.$router.push({name: to})
     },
     variantColor(data) {
@@ -332,7 +329,6 @@ export default {
       })
     },
     filterInvestment() {
-      const keys = Object.keys(this.searchItems)
       console.log(this.searchItems)
       let retVal = {title: false, status: false}
       keys.forEach(key => {
@@ -343,7 +339,29 @@ export default {
                   this.searchItems.status.status.toLowerCase() : investment.status.toLowerCase())
         })
       })
-    }
+    },
+    async deleteInvestment() {
+      const response = await this[InvestmentTypes.ACTION_DELETE_INVESTMENT]()
+      if (response.success) {
+        this.$toast({
+              component: ToastificationContent,
+              props: {
+                title: 'Investment Deleted',
+                icon: 'EditIcon',
+                variant: 'success',
+         },
+        })
+      } else {
+        this.$toast({
+              component: ToastificationContent,
+              props: {
+                title: 'Failed to Delete',
+                icon: 'EditIcon',
+                variant: 'danger',
+              },
+        })
+      }
+    },
   },
 }
 </script>

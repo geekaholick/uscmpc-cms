@@ -54,7 +54,14 @@ export default {
             if (response.data.success) {
                 dispatch(InvestmentTypes.ACTION_INVESTMENTS)
             }
-            console.log(response)
+            return response
+        },
+        [InvestmentTypes.ACTION_DELETE_INVESTMENT]: async ({dispatch}) => {
+            const investment = getters[InvestmentTypes.GETTER_INVESTMENT]
+            const response = await axios.delete(`investments/${investment.id}`)
+            if (response.success) {
+                dispatch(InvestmentTypes.ACTION_INVESTMENTS)
+            }
             return response
         }
     },
