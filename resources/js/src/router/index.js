@@ -58,6 +58,34 @@ const router = new VueRouter({
       path: '*',
       redirect: 'error-404',
     },
+    {
+        path: '/history',
+        name: 'History',
+        component: () => import('@/views/content-management/history.vue'),
+        meta: {
+          pageTitle: 'History',
+          breadcrumb: [
+            {
+              text: 'History',
+              active: true,
+            },
+          ],
+        },
+      },
+      {
+        path: '/history/:action',
+        name: 'History',
+        component: () => import('@/views/content-management/historyUpdate.vue'),
+        meta: {
+          pageTitle: 'History',
+          breadcrumb: [
+            {
+              text: 'History',
+              active: true,
+            },
+          ],
+        },
+      },
   ],
 })
 
