@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\OtherServicesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +15,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// Route::middleware('auth:api')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
+
+Route::post('otherService', [OtherServicesController::class, 'create']);
+Route::get('otherService/{otherServices}', [OtherServicesController::class, 'show']);
+Route::get('otherServices', [OtherServicesController::class, 'index']);
+Route::post('otherService/{otherServices}', [OtherServicesController::class, 'update']);
+Route::delete('otherService/{otherServices}', [OtherServicesController::class, 'destroy']);
+

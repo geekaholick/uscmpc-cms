@@ -13,6 +13,11 @@ export default [
         route: 'second-page',
         icon: 'FileIcon',
       },
+      {
+        title: 'Second Page',
+        route: 'other-services',
+        icon: 'FileIcon',
+      },
     ],
   },
 ]

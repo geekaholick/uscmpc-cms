@@ -39,6 +39,62 @@ const router = new VueRouter({
       },
     },
     {
+      path: '/other-services',
+      name: 'other-services',
+      component: () => import('@/views/OtherServices.vue'),
+      meta: {
+        pageTitle: 'Other Services',
+        breadcrumb: [
+          {
+            text: 'Other Services',
+            active: true,
+          },
+        ],
+      },
+    },
+    {
+      path: '/other-services/add',
+      name: 'add-other-services',
+      component: () => import('@/views/AddOtherServices.vue'),
+      meta: {
+        pageTitle: 'Other Services',
+        breadcrumb: [
+          {
+            text: 'Other Services',
+            active: true,
+          },
+        ],
+      },
+    },
+    // {
+    //   path: '/other-services/edit',
+    //   name: 'other-services',
+    //   component: () => import('@/views/EditOtherServices.vue'),
+    //   meta: {
+    //     pageTitle: 'Other Services',
+    //     breadcrumb: [
+    //       {
+    //         text: 'Other Services',
+    //         active: true,
+    //       },
+    //     ],
+    //   },
+    // },
+    {
+      path: '/other-services-edit/:id?',
+      name: 'edit-other-services',
+      component: () => import('@/views/EditOtherServices.vue'),
+      meta: {
+        pageTitle: 'Other Services',
+        breadcrumb: [
+          {
+            text: 'Other Services',
+            active: true,
+          },
+        ],
+      },
+    },
+    {
       path: '/login',
       name: 'login',
       component: () => import('@/views/Login.vue'),
