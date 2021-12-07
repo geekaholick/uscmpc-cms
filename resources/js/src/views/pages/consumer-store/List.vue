@@ -27,10 +27,11 @@
           <!-- Event Status -->
           <b-form-group class="w-100">
             <label>Consumer Store</label>
-            <v-select
-              v-model="searchParams.status"
+            <b-form-select
+              v-model="selectedStatus"
               label="status"
               :options="consumerStoreStatuses"
+              @change="filterStatus"
             />
           </b-form-group>
         </b-col>
@@ -83,9 +84,9 @@
             md="6"
           >
             <b-form-input
+              v-model="searchQuery"
               placeholder="Search"
               class="w-100"
-              v-model="searchParams.title"
             />
           </b-col>
           <!-- Add New Event -->
@@ -99,7 +100,7 @@
               type="button"
               to="/banner/new"
               @click="isAddNewUserSidebarActive = true"
-            >Add New Consumer Store</b-button>
+            >Add Consumer Store</b-button>
           </b-col>
         </b-row>
       </div>
@@ -108,7 +109,6 @@
         ref="refEventListTable"
         class="position-relative"
         :filter="searchQuery"
-        :filter-included-fields="consumerStoreTableFields"
         :items="consumerStoreCopy"
         :fields="consumerStoreTableFields"
         :current-page="currentPage"
@@ -117,10 +117,12 @@
         show-empty
         empty-text="No matching records found"
         :per-page="perPage"
+        :filter-included-fields="filterOn"
+        @filtered="onFiltered"
       >
         <!-- Column: Investment Icon -->
         <template #cell(icon)="data">
-          <span><i :class="data.item.icon"></i></span>
+          <span><i :class="data.item.icon" /></span>
           <!-- <b-media vertical-align="center">
             <b-link
               :to="{ name: 'apps-users-view', params: { id: data.item.id } }"
@@ -161,7 +163,7 @@
           <b-badge
             pill
             class="text-capitalize"
-            :variant="(variantColor(data.item)).variant"
+            :variant="variantColor(data.item).variant"
           >{{ data.item.status }}</b-badge>
         </template>
 
@@ -184,12 +186,16 @@
               <span class="align-middle ml-50">Details</span>
             </b-dropdown-item> -->
 
-            <b-dropdown-item @click="setconsumerStore(data.item, 'edit-consumerstore')">
+            <b-dropdown-item
+              @click="setconsumerStore(data.item, 'edit-consumerstore')"
+            >
               <feather-icon icon="EditIcon" />
               <span class="align-middle ml-50">Edit</span>
             </b-dropdown-item>
 
-            <b-dropdown-item @click="setconsumerStore(data.item, 'list-consumerstore', true)">
+            <b-dropdown-item
+              @click="setconsumerStore(data.item, 'list-consumerstore', true)"
+            >
               <feather-icon icon="TrashIcon" />
               <span class="align-middle ml-50">Delete</span>
             </b-dropdown-item>
@@ -234,6 +240,7 @@ import {
   BPagination,
   BFormGroup,
   BFormInput,
+  BFormSelect,
   BButton,
   BBadge,
   BTable,
@@ -253,6 +260,7 @@ export default {
     BPagination,
     BFormGroup,
     BFormInput,
+    BFormSelect,
     BButton,
     BBadge,
     BTable,
@@ -266,8 +274,11 @@ export default {
   data: () => ({
     searchQuery: null,
     searchParams: {},
+    selectedStatus: 'all',
     perPageOptions: [10, 20, 30, 40, 50],
     perPage: 10,
+    filterOn: [],
+    rows: 1,
     currentPage: 1,
     consumerStoreCopy: [],
     consumerStoreTableFields: [
@@ -281,9 +292,26 @@ export default {
     ],
     dir: 'ltr',
     consumerStoreStatuses: [
-      { status: 'Active', variant: 'success', id: 1 },
-      { status: 'Inactive', variant: 'secondary', id: 0 },
-      { status: 'Removed', variant: 'warning', id: 2 },
+      {
+        status: 'All', variant: '', id: 3, text: 'All', value: 'all',
+      },
+      {
+        status: 'Active', variant: 'success', id: 1, text: 'Active', value: 'active',
+      },
+      {
+        status: 'Inactive',
+        variant: 'secondary',
+        id: 0,
+        text: 'Inactive',
+        value: 'inactive',
+      },
+      {
+        status: 'Removed',
+        variant: 'warning',
+        id: 2,
+        text: 'Removed',
+        value: 'removed',
+      },
     ],
     option2: [{ option: 'Yes' }, { option: 'No' }],
   }),
@@ -292,9 +320,9 @@ export default {
       consumerstores: ConsumerStoreTypes.GETTER_CONSUMER_STORES,
       searchItems: ConsumerStoreTypes.GETTER_CONSUMER_STORE_SEARCH,
     }),
-    rows() {
-      return this.consumerStoreCopy.length
-    },
+    // rows() {
+    //   return this.consumerStoreCopy.length
+    // },
   },
   watch: {
     searchParams: {
@@ -313,7 +341,10 @@ export default {
     this.consumerStoreCopy = this.consumerstores
   },
   methods: {
-    ...mapActions([ConsumerStoreTypes.ACTION_CONSUMER_STORES, ConsumerStoreTypes.ACTION_DELETE_CONSUMER_STORE]),
+    ...mapActions([
+      ConsumerStoreTypes.ACTION_CONSUMER_STORES,
+      ConsumerStoreTypes.ACTION_DELETE_CONSUMER_STORE,
+    ]),
     ...mapMutations([
       ConsumerStoreTypes.MUTATION_CONSUMER_STORE,
       ConsumerStoreTypes.MUTATION_CONSUMER_STORE_SEARCH,
@@ -327,20 +358,47 @@ export default {
       this.$router.push({ name: to })
     },
     variantColor(data) {
-      return this.consumerStoreStatuses.find(consumerStoreStatus => consumerStoreStatus.status.toLowerCase() === data.status.toLowerCase())
+      return this.consumerStoreStatuses.find(
+        consumerStoreStatus => consumerStoreStatus.status.toLowerCase()
+          === data.status.toLowerCase(),
+      )
     },
     filterConsumerStore() {
       const keys = Object.keys(this.searchItems)
       // let retVal = { title: false, status: false }
       keys.forEach(() => {
-        this.consumerStoreCopy = this.inv.filter(consumerstore => consumerstore.title.toLowerCase().includes(this.searchItems.title
-          ? this.searchItems.title.toLowerCase() : '')
-            && consumerstore.status.toLowerCase() === (this.searchItems.status
-              ? this.searchItems.status.status.toLowerCase() : consumerstore.status.toLowerCase()))
+        this.consumerStoreCopy = this.inv.filter(
+          consumerstore => consumerstore.title
+            .toLowerCase()
+            .includes(
+              this.searchItems.title
+                ? this.searchItems.title.toLowerCase()
+                : '',
+            )
+            && consumerstore.status.toLowerCase()
+              === (this.searchItems.status
+                ? this.searchItems.status.status.toLowerCase()
+                : consumerstore.status.toLowerCase()),
+        )
       })
     },
+    onFiltered(filteredItems) {
+      this.rows = filteredItems.length
+      this.currentPage = 1
+    },
+
+    filterStatus() {
+      if (this.selectedStatus === 'all') {
+        this.consumerStoreCopy = this.consumerstores
+      } else {
+        this.consumerStoreCopy = this.consumerstores.filter(item => item.status === this.selectedStatus)
+      }
+    },
+
     async deleteConsumerStore() {
-      const response = await this[ConsumerStoreTypes.ACTION_DELETE_CONSUMER_STORE]()
+      const response = await this[
+        ConsumerStoreTypes.ACTION_DELETE_CONSUMER_STORE
+      ]()
       console.log(response)
       if (response.data.success) {
         this.$toast({
