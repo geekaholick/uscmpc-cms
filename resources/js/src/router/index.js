@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import * as ConsumerStoreRoutes from '@/router/consumer-store'
 
 Vue.use(VueRouter)
 
@@ -10,6 +11,7 @@ const router = new VueRouter({
     return { x: 0, y: 0 }
   },
   routes: [
+    ...ConsumerStoreRoutes.default, 
     {
       path: '/',
       name: 'home',
@@ -23,29 +25,7 @@ const router = new VueRouter({
           },
         ],
       },
-    },
-    {
-      path: '/second-page',
-      name: 'second-page',
-      component: () => import('@/views/SecondPage.vue'),
-      meta: {
-        pageTitle: 'Second Page',
-        breadcrumb: [
-          {
-            text: 'Second Page',
-            active: true,
-          },
-        ],
-      },
-    },
-    {
-      path: '/login',
-      name: 'login',
-      component: () => import('@/views/Login.vue'),
-      meta: {
-        layout: 'full',
-      },
-    },
+    },  
     {
       path: '/error-404',
       name: 'error-404',
