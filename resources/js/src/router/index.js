@@ -39,6 +39,34 @@ const router = new VueRouter({
       },
     },
     {
+      path: '/banner',
+      name: 'banner',
+      component: () => import('@/views/banner/Banner.vue'),
+      meta: {
+        pageTitle: 'Banner',
+        breadcrumb: [
+          {
+            text: 'Banner',
+            active: true,
+          },
+        ],
+      },
+    },
+    {
+      path: '/bannerform/:id?',
+      name: 'bannerform',
+      component: () => import('@/views/banner/BannerForm.vue'),
+      meta: {
+        pageTitle: 'Banner Form',
+        breadcrumb: [
+          {
+            text: 'Banner Form',
+            active: true,
+          },
+        ],
+      },
+    },
+    {
       path: '/login',
       name: 'login',
       component: () => import('@/views/Login.vue'),
